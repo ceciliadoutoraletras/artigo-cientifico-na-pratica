@@ -68,9 +68,14 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .brand strong{display:block;font-family:var(--font-display);font-weight:400;font-size:1.15rem;line-height:1.2}
 .brand span{font-size:.85rem;color:var(--ink-soft)}
 .progress-pill{flex:none;display:flex;align-items:center;gap:8px;padding:4px 12px 4px 6px;border-radius:999px;background:var(--sunk);border:1px solid var(--line);font-size:.85rem;font-variant-numeric:tabular-nums;cursor:pointer}
-.nav-scroll{overflow-x:auto;scrollbar-width:none}
-.nav-scroll::-webkit-scrollbar{display:none}
-nav.tabs{display:flex;gap:4px;padding-bottom:8px;width:max-content}
+.nav-scroll{position:relative}
+nav.tabs{display:flex;flex-wrap:wrap;gap:4px;padding-bottom:8px}
+@media (max-width:760px){
+  .nav-scroll{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;-webkit-overflow-scrolling:touch}
+  .nav-scroll::-webkit-scrollbar{height:4px}
+  .nav-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+  nav.tabs{flex-wrap:nowrap;width:max-content;padding-bottom:6px}
+}
 nav.tabs a{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;text-decoration:none;color:var(--ink-soft);font-weight:600;font-size:.93rem;white-space:nowrap}
 nav.tabs a:hover{background:var(--sunk);color:var(--ink)}
 nav.tabs a[aria-current="page"]{background:var(--petal);color:#3A2419}
@@ -1248,9 +1253,11 @@ function go(id){
   views.forEach(function(v){v.hidden=v.dataset.view!==id});
   [].forEach.call(tabsEl.children,function(t){ if(t.getAttribute('href')==='#'+id){t.setAttribute('aria-current','page');t.scrollIntoView({block:'nearest',inline:'nearest'})} else t.removeAttribute('aria-current')});
   try{history.replaceState(null,'','#'+(target?target.id:id))}catch(err){}
-  if(target){target.scrollIntoView({block:'start'});window.scrollBy(0,-130)} else window.scrollTo({top:0});
+  if(target){target.scrollIntoView({block:'start'});window.scrollBy(0,-(document.querySelector('header.top').offsetHeight+16))} else window.scrollTo({top:0});
 }
 $('pill').addEventListener('click',function(){go('inicio')});
+var ns=document.querySelector('.nav-scroll');
+ns.addEventListener('wheel',function(e){if(ns.scrollWidth>ns.clientWidth&&Math.abs(e.deltaY)>Math.abs(e.deltaX)){ns.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 function refreshChaps(){
   var n=0;
   chaps.forEach(function(c){var d=!!state['ch-'+c.id];if(d)n++;
